@@ -1,6 +1,6 @@
 <?php
 
-namespace dginsburg\objectOriented;
+namespace dginsburg\ObjectOriented;
 /**
  * Trait to Validate a mySQL Date
  *

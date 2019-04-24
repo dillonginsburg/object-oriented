@@ -3,10 +3,10 @@
  *I understand the idea of specifying a namespace, but this exact bit of code is beyond me.
  */
 
-namespace dginsburg\objectOriented;
-require_once(dirname(__DIR__, 2) . "/vendor/autoload.php");
+namespace dginsburg\ObjectOriented;
+require_once(dirname(__DIR__) . "/vendor/autoload.php");
+require_once(dirname(__DIR__) . "/classes/autoload.php");
 
-use http\Exception\InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
 /**
  *creating a class for table 'author'
@@ -31,8 +31,26 @@ class Author {
 	/**
 	 *accessor method for authorId
 	 *
-	 * @return Uuid for authorId
+	 *
 	 */
+
+	public function __construct($newAuthorId, string $newAuthorAvatarUrl, string $newAuthorActivationToken,
+										 string $newAuthorEmail, string $newAuthorHash, string $newAuthorUsername ) {
+		try {
+			$this->setAuthorId($newAuthorId);
+			$this->setAuthorAvatarUrl($newAuthorAvatarUrl);
+			$this->setAuthorActivationToken($newAuthorActivationToken);
+			$this->setAuthorEmail($newAuthorEmail);
+			$this->setAuthorHash($newAuthorHash);
+			$this->setAuthorUsername($newAuthorUsername);
+		}
+			//determine what exception type was thrown
+		catch(\InvalidArgumentException | \RangeException | \Exception | \TypeError $exception) {
+			$exceptionType = get_class($exception);
+			throw(new $exceptionType($exception->getMessage(), 0, $exception));
+		}
+	}
+
 	public function getAuthorId(): Uuid {
 		return ($this->authorId);
 }
@@ -76,7 +94,7 @@ class Author {
 
 	public function setAuthorAvatarUrl($newAuthorAvatarUrl) : void {
 		$newAuthorAvatarUrl = trim($newAuthorAvatarUrl);
-		$newAuthorAvatarUrl = filter_var($newAuthorAvatarUrl, filter_validate_url);
+		$newAuthorAvatarUrl = filter_var($newAuthorAvatarUrl, FILTER_VALIDATE_URL);
 		if(empty($newAuthorAvatarUrl) === true) {
 			throw(new \RangeException("Author Avatar URL is is empty or insecure"));
 		}
@@ -131,7 +149,7 @@ class Author {
 
 	public function setAuthorEmail( string $newAuthorEmail): void{
 	$newAuthorEmail = trim($newAuthorEmail);
-	$newAuthorEmail = filter_var($newAuthorEmail, filter_validate_email);
+	$newAuthorEmail = filter_var($newAuthorEmail, FILTER_VALIDATE_EMAIL);
 	if(empty($newAuthorEmail) === true) {
 		throw(new \InvalidArgumentException("authorEmail is empty or insecure"));
 	}
@@ -179,9 +197,14 @@ class Author {
 	 * accessor method for AuthorUsername
 	 *
 	 */
-	public function getAuthorUsername(string $newAuthorUsername) : void {
+	public function getAuthorUsername():?string {
+		return $this->authorUsername;
+	}
+
+
+	public function setAuthorUsername(string $newAuthorUsername) : void {
 		$newAuthorUsername = trim($newAuthorUsername);
-		if(empty(newAuthorUsername) === true) {
+		if(empty($newAuthorUsername) === true) {
 			throw(new \InvalidArgumentException("author username is not a valid username"));
 		}
 		if(strlen($newAuthorUsername)>32){
