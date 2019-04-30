@@ -213,6 +213,80 @@ class Author {
 		$this->authorUsername = $newAuthorUsername;
 	}
 
+	public function insert (\PDO $pdo) : void{
+		$query = "insert into author(authorId, authorAvatarUrl, authorActivationToken, authorEmail, authorHash, authorUsername) values (:authorId, :authorAvatarUrl, :authorActivationToken, authorEmail, authorHash, authorUsername)";
+	}
+
+	public function update(\PDO $pdo) : void {
+		$query = "update tweet set authorId = :authorId, authorAvatarUrl = :authorAvatarUrl, authorActivationTOoken = :authorActivationToken, authorEmail = :authorEmail, authorHash = :authorHash, authorUsername = :authorUsername";
+		$satement = $pdo->prepare($query);
+
+		$parameters = ["authorId" => $this -> tweetId->getBytes(), "authorAvatarUrl => $this -> authorAvatarUrl, authorActivationToken => $this -> authorActivationToken, authorEmail => $this -> authorEmail, authorHash => $this -> authorHash -> getBytes(), authorUsername => $this -> authorUsername"];
+		$satement ->execute($parameters);
+	}
+	public function delete (\PDO $pdo) : void {
+		$query = "delete from author where authorId = :authorId";
+		$statement = $pdo->prepare($query);
+
+		$parameters = ["authorId" => $this->authorId->getbytes()];
+			$statement -> execute ($parameters);
+	}
+
+	public static function getAuthorByAuthorId(\PDO $pdo, $authorId) : ?author {
+		try{
+			$authorId = self::validateUuid($authorId);
+		}
+		Catch(\InvalidArgumentException | \RangeException | \Exception | \TypeError $exception){
+			throw(new \PDOException($exception->getMessage(), 0, $exception));
+		}
+		$query = "select authorId, authorAvatarUrl, authorActivationToken, authorEmail, authorhash, authorUsername from author where authorId = :authorId";
+		$statement = $pdo->prepare($query);
+
+		$parameters = [authorId => $authorId->getBytes()];
+		$statement->execute($parameters);
+
+		try{
+			$author = null;
+			$statement->setFetchMode(\PDO::fetch_assoc);
+			$row = $statement-fetch();
+			if($row !== false) {
+				$author = new author($row["authorId"], $row["authorAvatarUrl"], $row["authorActivationToken"], $row["authorEmail"], $row["authorHash"], $row["authorUsername"]);
+			}
+		}
+		catch(\Exception $exception) {
+			throw(new \PDOException($exception->getmessage(), 0, $exception));
+		}
+		return($author);
+	}
+
+	public static function getAuthorEmailByAuthorId(\PDO $pdo, $authorUsername) : \SplFixedArray {
+		try{
+			$authorId = self::validateUuid($authorId);
+		}
+		catch(\InvalidArgumentException | \RangeException| \Exception | \TypeError $exception) {
+			throw(new \PDOException($exception->getMessage(), 0, $exception));
+		}
+
+		$query = "select authorId, authorAvatarUrl, authorActivationToken, authorEmail, authorHash, authorUsername from author where authorId = :authorId";
+		$statement = $pdo-prepare($query);
+
+		$parameters = ["authorId" => $authorId->getBytes()];
+		statement->execute($parameters);
+
+		$authorEmails = new \SplFixedArray($statement->rowCount());
+		statement->setFetchMode(\PDO::FETCH_ASSOC);
+		while(($row = $statement->fetch()) !== false) {
+			try {
+				$authorEmail = new authorEmail(($row["authorId"], $row["authorAvatarUrl"], $row["authorActivationToken"], $row["authorEmail"], $row["authorHash"], $row["authorUsername"]);
+				$authorEmails[$authorEmails->key()] = $authorEmail;
+				$authorEmails->next();
+			}
+			catch(\Exception $exception) {
+				throw(new \PDOException($exception->getMessage(), 0, $exception));
+			}
+		}
+		return($authorEmails);
+	}
 
 
 }
