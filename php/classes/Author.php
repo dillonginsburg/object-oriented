@@ -11,7 +11,8 @@ use Ramsey\Uuid\Uuid;
 /**
  *creating a class for table 'author'
  */
-class Author {
+class
+Author {
 	/**
 	 *id and primary key for table.
 	 * mentioning a function to validate uuid's, but we dont have the actual uuid yet.
@@ -259,34 +260,43 @@ class Author {
 		return($author);
 	}
 
-	public static function getAuthorEmailByAuthorId(\PDO $pdo, $authorUsername) : \SplFixedArray {
-		try{
-			$authorId = self::validateUuid($authorId);
+	//get authors by email provider
+	public static function getAuthorsByEmailProvider (\PDO $pdo, string $EmailType) : \SplFixedArray {
+		$EmailType = trim($EmailType);
+		$EmailType = filter_var($EmailType, filter_sanitze_string);
+		if(empty($EmailType)===true){
+			throw(new \PDOException("author Email is invalid"));
 		}
-		catch(\InvalidArgumentException | \RangeException| \Exception | \TypeError $exception) {
-			throw(new \PDOException($exception->getMessage(), 0, $exception));
-		}
 
-		$query = "select authorId, authorAvatarUrl, authorActivationToken, authorEmail, authorHash, authorUsername from author where authorId = :authorId";
-		$statement = $pdo-prepare($query);
+		//escape sql wildcards
+		$EmailType = str_replace("_", "\\_", str_replace("%", "\\%", $EmailType));
 
-		$parameters = ["authorId" => $authorId->getBytes()];
-		statement->execute($parameters);
+		//create query template
+		$query = "select authorId, authorAvatarUrl, authorActivationToken, authorEmail, authorHash, authorUsername from author where authorEmail like :gmail";
+		$statement = $pdo->prepare($query);
 
-		$authorEmails = new \SplFixedArray($statement->rowCount());
-		statement->setFetchMode(\PDO::FETCH_ASSOC);
+		//bind email to place holder
+		$EmailType = "%$EmailType%";
+		$parameters = ["EmailType" => $EmailType];
+		$statement->execute ($parameters);
+
+		//build array of authors
+		$authors = new \SplFixedArray($statement->rowCount());
+		$statement->setFetchMode(\PDO::FETCH_ASSOC);
 		while(($row = $statement->fetch()) !== false) {
 			try {
-				$authorEmail = new authorEmail(($row["authorId"], $row["authorAvatarUrl"], $row["authorActivationToken"], $row["authorEmail"], $row["authorHash"], $row["authorUsername"]);
-				$authorEmails[$authorEmails->key()] = $authorEmail;
-				$authorEmails->next();
+				$authors[$authors->key()] =  new author($row["authorId"], $row["authorAvatarUrl"], $row["authorActivationToken"], $row["authorEmail"], $row["authorHash"], $row["authorUsername"]);
+				$authors->next();
 			}
 			catch(\Exception $exception) {
 				throw(new \PDOException($exception->getMessage(), 0, $exception));
 			}
 		}
-		return($authorEmails);
+		return($authors);
 	}
+
+
+
 
 
 }
