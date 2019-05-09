@@ -52,6 +52,8 @@ Author {
 		}
 	}
 
+
+	//accessor method for authorId
 	public function getAuthorId(): Uuid {
 		return ($this->authorId);
 }
@@ -111,22 +113,19 @@ Author {
 	 */
 	
 	
-	public function getAuthorActivationToken(): ?string {
+	public function getAuthorActivationToken(): string {
 		return ($this->authorActivationToken);
 	}
 	/**
 	 * mutator method for author activation token
 	 *
-	 * @param string $newauthorActivationToken
-	 * @throws \InvalidArgumentException if the url is not a string or insecure
-	 * @throws \ TypeError if the url is not a string
+	 * @
 	 */
-	public function setAuthorActivationToken(?string $newAuthorActivationToken): void {
+	public function setAuthorActivationToken(string $newAuthorActivationToken): void {
 		if($newAuthorActivationToken === null) {
 			$this->authorActivationToken = null;
 			return;
 		}
-		$newAuthorActivationToken = strtolower(trim($newAuthorActivationToken));
 		if(ctype_xdigit($newAuthorActivationToken) === false) {
 			throw(new\RangeException("user activation is not valid"));
 		}
@@ -198,7 +197,7 @@ Author {
 	 * accessor method for AuthorUsername
 	 *
 	 */
-	public function getAuthorUsername():?string {
+	public function getAuthorUsername():string {
 		return $this->authorUsername;
 	}
 
